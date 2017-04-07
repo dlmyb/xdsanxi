@@ -1,11 +1,10 @@
 # coding: utf-8
 
-from leancloud import Engine
+from leancloud import Engine,HttpsRedirectMiddleware
 
 from app import app
 
-
-engine = Engine(app)
+engine = Engine(HttpsRedirectMiddleware(app))
 
 
 # @engine.define
