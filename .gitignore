@@ -1,1 +1,4 @@
 start.sh
+*.pyc
+.leancloud
+.vscode
