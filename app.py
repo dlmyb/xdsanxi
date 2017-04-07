@@ -47,6 +47,7 @@ def grade():
         return Response("Unexited User", 401)
     token = info['token']
     u = leancloud.User.become(token)
+    u.fetch()
     result = {
         "data": json.loads(u.get("data")),
         "version": u.get("version")
@@ -70,6 +71,7 @@ def check():
 
     token = info['token']
     u = leancloud.User.become(token)
+    u.fetch()
     if u.get("version") == version:
         return Response("", 200)
     else:
