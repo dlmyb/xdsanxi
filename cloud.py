@@ -4,8 +4,6 @@ from leancloud import Engine,HttpsRedirectMiddleware
 from app import app
 
 engine = Engine(HttpsRedirectMiddleware(app))
-
-
 # @engine.define
 # def hello(**params):
 #     if 'name' in params:
@@ -13,8 +11,7 @@ engine = Engine(HttpsRedirectMiddleware(app))
 #     else:
 #         return 'Hello, LeanCloud!'
 
-
-# Python 环境下, Cloud function 无法使用
+#
 # @engine.after_save("bugList")
 # def bugreport(item):
 #     imgList = item.get("imgs")

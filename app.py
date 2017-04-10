@@ -91,6 +91,7 @@ def feedback():
     file = request.files
     try:
         jwtoken = file['jwt'].read()
+        email = file['email'].read()
     except KeyError:
         return Response("",400)
     try:
@@ -129,12 +130,14 @@ def feedback():
     </head>
     <html lang="zh-hans">
     <body>
-    <p>存在一个 Bug,由 <b>{name}</b> 用户提出,说明如下:</p>
+    <p>存在一个 Bug,由 <b><a href="mailto:{email}">{name}</a></b> 用户提出,说明如下:</p>
     <p>{description}</p>
+    </br>
     {img}
     </body></html>""".format(
         name=u.get("name"),
         description=description,
+        email=email,
         img="\n".join([u"<img src=\"{}\" alt=\"img\" width=\"{}\" height=\"{}\">".format(
                             img.url,
                             img.metadata['width'],
