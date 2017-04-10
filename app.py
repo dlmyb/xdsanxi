@@ -142,8 +142,6 @@ def feedback():
                         )
                        for img in fileList])
     )
-    print html
     send(html)
-    print "sending emails!"
     return Response("Upload success!",200)
 
