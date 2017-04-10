@@ -9,7 +9,7 @@ import jwt
 from StringIO import StringIO
 
 app = Flask("__name__", static_folder='static', static_path="")
-# app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 
 JWT_KEY = "DLMYB"
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
