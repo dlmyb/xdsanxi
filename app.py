@@ -3,6 +3,7 @@ __author__ = 'dlmyb'
 
 import json
 from flask import Flask, request, Response, jsonify
+from utils import send,get_image_size
 import leancloud
 import jwt
 from StringIO import StringIO
@@ -100,7 +101,11 @@ def feedback():
     fileList = list()
     for img in imgs:
         if allowed_file(img.filename) and img:
-            fileObject = leancloud.File(img.filename,StringIO(img.read()))
+            s = StringIO(img.read())
+            fileObject = leancloud.File(img.filename,s)
+            width,height = get_image_size(s,img.filename)
+            fileObject.metadata['width'] = width
+            fileObject.metadata['height'] = height
             fileObject.save()
             fileList.append(fileObject)
         else:
@@ -111,10 +116,34 @@ def feedback():
     # fileList.append(fileObject)
 
     description = file["description"].read()
+    u = leancloud.User.become(info["token"])
     Obj = leancloud.Object.create("bugList")
     Obj.set("description",description)
     Obj.set("imgs",fileList)
-    Obj.set("upload",leancloud.User.become(info["token"]))
+    Obj.set("upload",u)
     Obj.save()
+    html = \
+    u"""<!doctype html>
+    <head>
+    <meta charset="utf-8">
+    </head>
+    <html lang="zh-hans">
+    <body>
+    <p>存在一个 Bug,由 <b>{name}</b> 用户提出,说明如下:</p>
+    <p>{description}</p>
+    {img}
+    </body></html>""".format(
+        name=u.get("name"),
+        description=description,
+        img="\n".join([u"<img src=\"{}\" alt=\"img\" width=\"{}\" height=\"{}\">".format(
+                            img.url,
+                            img.metadata['width'],
+                            img.metadata['height']
+                        )
+                       for img in fileList])
+    )
+    print html
+    send(html)
+    print "sending emails!"
     return Response("Upload success!",200)
 
