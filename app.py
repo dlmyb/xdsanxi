@@ -99,7 +99,6 @@ def feedback():
     imgs = file.getlist("imgs")
     fileList = list()
     for img in imgs:
-        print img.filename
         if allowed_file(img.filename) and img:
             fileObject = leancloud.File(img.filename,StringIO(img.read()))
             fileObject.save()

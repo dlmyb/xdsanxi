@@ -31,4 +31,5 @@ def bugreport(item):
         description=item.get("description"),
         img="\n".join(["<img src=\"{}\" alt=\"img\">".format(img.url) for img in imgList])
     )
+    print "sending emails!"
     send(html)
