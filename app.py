@@ -3,7 +3,7 @@ __author__ = 'dlmyb'
 
 import json
 from flask import Flask, request, Response, jsonify
-from utils import send,get_image_size
+from utils import send, get_image_size
 import leancloud
 import jwt
 from StringIO import StringIO
@@ -14,13 +14,16 @@ app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 JWT_KEY = "DLMYB"
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
+
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
 @app.errorhandler(404)
 def index(e):
     return app.send_static_file("index.html")
+
 
 @app.route("/api/login", methods=['POST'])
 def login():
@@ -55,7 +58,7 @@ def grade():
     try:
         u = leancloud.User.become(token)
     except leancloud.LeanCloudError as e:
-        return Response(e.message,401)
+        return Response(e.message, 401)
     u.fetch()
     result = {
         "data": json.loads(u.get("data")),
@@ -86,14 +89,16 @@ def check():
     else:
         return Response("", 410)
 
-@app.route("/api/feedback",methods=['POST'])
+
+@app.route("/api/feedback", methods=['POST'])
 def feedback():
     file = request.files
+    form = request.form
     try:
-        jwtoken = file['jwt'].read()
-        email = file['email'].read()
+        jwtoken = form.get("jwt")
+        email = form.get("email")
     except KeyError:
-        return Response("",400)
+        return Response("", 400)
     try:
         info = jwt.decode(jwtoken, JWT_KEY)
     except jwt.InvalidTokenError:
@@ -103,28 +108,28 @@ def feedback():
     for img in imgs:
         if allowed_file(img.filename) and img:
             s = StringIO(img.read())
-            fileObject = leancloud.File(img.filename,s)
-            width,height = get_image_size(s,img.filename)
+            fileObject = leancloud.File(img.filename, s)
+            width, height = get_image_size(s, img.filename)
             fileObject.metadata['width'] = width
             fileObject.metadata['height'] = height
             fileObject.save()
             fileList.append(fileObject)
         else:
-            return Response("",400)
+            return Response("", 400)
 
     # fileObject = leancloud.File(imgs.filename,StringIO(imgs.read()))
     # fileObject.save()
     # fileList.append(fileObject)
 
-    description = file["description"].read()
+    description = form.get("description")
     u = leancloud.User.become(info["token"])
     Obj = leancloud.Object.create("bugList")
-    Obj.set("description",description)
-    Obj.set("imgs",fileList)
-    Obj.set("upload",u)
+    Obj.set("description", description)
+    Obj.set("imgs", fileList)
+    Obj.set("upload", u)
     Obj.save()
     html = \
-    u"""<!doctype html>
+        u"""<!doctype html>
     <head>
     <meta charset="utf-8">
     </head>
@@ -139,12 +144,11 @@ def feedback():
         description=description,
         email=email,
         img="\n".join([u"<img src=\"{}\" alt=\"img\" width=\"{}\" height=\"{}\">".format(
-                            img.url,
-                            img.metadata['width'],
-                            img.metadata['height']
-                        )
+            img.url,
+            img.metadata['width'],
+            img.metadata['height']
+        )
                        for img in fileList])
-    )
+        )
     send(html)
-    return Response("Upload success!",200)
-
+    return Response("Upload success!", 200)
